@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<configuration>
+<properties fileName="sharc.development.properties"/>
+<properties fileName="sharc.global.properties"/>
+</configuration>
+	

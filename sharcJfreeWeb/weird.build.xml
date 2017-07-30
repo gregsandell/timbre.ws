@@ -1,0 +1,36 @@
+<project name="SharcJfreeWeb Webapp" default="build" basedir=".">
+
+    <property environment="env"/>
+		<property file="build.properties" />
+
+    <target name="mvndist" depends="mvnclean">
+        <copy todir="${dist.webapps.dir}" file="target/${war.name}"/>
+    </target>
+		<target name="mvnclean">
+			<delete file="${dist.war.file}" />
+			<delete dir="${tomcat.app.dir}" />
+	</target>
+	  <target name="/* BOUNCE */"/>
+    <target name="bounceJsp" depends="cleanCompiledJsps">
+        <copy todir="${tomcat.app.dir}">
+            <fileset dir="${baseWebdir}">
+                <patternset>
+                    <include name="**/*.jsp"/>
+                    <include name="**/*.html"/>
+                    <include name="**/*.htm"/>
+                    <include name="**/*.css"/>
+                    <include name="**/*.js"/>
+                    <exclude name="doc/**/*"/>
+                </patternset>
+            </fileset>
+        </copy>
+    </target>
+  <target	name="cleanCompiledJsps">
+        <!-- <delete dir="${compiled.jsps.dir}"/> -->
+  </target>
+  <target name="foo">
+          <echo message="${baseWebdir}"/>
+  </target>
+
+
+</project>

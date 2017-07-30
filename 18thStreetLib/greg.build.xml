@@ -1,0 +1,20 @@
+<project name="Greg's IES Common Functions jarfile" default="all" basedir=".">
+
+  <!-- The environment property must be defined before including
+       the properties file -->
+  <property environment="env"/>
+  <!-- Modify this for each team member
+       (e.g. sultan.build.properties, etc.) -->
+  <!-- foo -->
+  <property file="build.properties" />
+  <property file="greg.build.properties" />
+	<target name="build">
+		<ant antfile="build.xml" target="build"  />
+	</target>
+  <target name="gregCopy" depends="build">
+    <copy todir="${localJars.dir}" file="${jar.name}"/>
+		<copy todir="${SSdarJars.dir}" file="${jar.name}"/>
+    <copy todir="${SharcJfreeWebJar.dir}" file="${jar.name}"/>
+  </target>
+
+</project>

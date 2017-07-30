@@ -1,0 +1,63 @@
+<project name="IES Common Test Suite" default="test" basedir=".">
+
+  <property file="build.properties" />
+	<property name="tests.jar.name" value="ies_common_tests.jar"/>
+  <target name="prepare">
+    <mkdir dir="${test.classes.dir}"/>
+		<copy file="./log4j.properties" todir="${test.classes.dir}" />
+  </target>
+	<target name="clean">
+		<delete dir="${test.classes.dir}"/>
+	</target>
+
+  <path id="compile.classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar">
+		    <exclude name="ies_common.jar"/>
+		</fileset>
+
+  </path>
+  <path id="tests.classpath">
+		<!-- <pathelement path="${test.classes.dir}"/>   -->
+		<fileset dir="." includes="**/*.jar"/>
+		<fileset dir="." includes="${tests.jar.name}"/>
+  </path>
+  <path id="tests.sourcepath">
+		<pathelement path="${test.src.dir}"/>
+		<pathelement path="${src.dir}"/>
+  </path>
+
+   <target name="compile" depends="clean, prepare">
+
+     <javac destdir="${test.classes.dir}" srcdir="${test.src.dir}"
+            debug="on" optimize="off" deprecation="off">
+       <classpath refid="compile.classpath" />
+			 <sourcepath refid="tests.sourcepath" />
+     </javac>
+		 <!--
+     <copy todir="${test.classes.dir}">
+       <fileset dir="${tests.src.dir}" excludes="**/*.java"/>
+     </copy>
+		 -->
+   </target>
+	 <target name="build" depends="compile">
+		 <jar jarfile="${tests.jar.name}"
+			 basedir="${test.classes.dir}"
+			 includes="**/*.class" />
+	 </target>
+
+  <target name="test" depends="build">
+		<junit>
+      <classpath refid="tests.classpath" />
+      <formatter type="brief" usefile="false" />
+			<test name="org.iesabroad.common.fileSystem.FileSystemUtilsTest" />
+			<test name="org.iesabroad.common.web.StringUtilsTest" />
+		</junit>
+<!--		<junit>
+      <classpath refid="tests.classpath" />
+      <formatter type="brief" usefile="false" />
+			<test name="org.iesabroad.common.soThinkMenu.StringUtilsTest" />
+		</junit>    -->
+  </target>
+
+
+</project>

@@ -1,0 +1,316 @@
+<project name="Sharc JFreeCharts Webapp" default="build" basedir=".">
+
+	<property environment="env"/>
+		<property file="build.properties" />
+		<property name="build.WEB-INF.dir" value="${build.dir}/WEB-INF" />
+		<property name="build.classes.dir" value="${build.WEB-INF.dir}/classes" />
+		<property name="build.lib.dir" value="${build.WEB-INF.dir}/lib" />
+		<property name="servlet.jar.fullpath" value="${auxJars.path}/${servlet.jar}"/>
+		<property name="jsp.jar.fullpath" value="${auxJars.path}/${jsp.jar}"/>
+		<property name="j2ee.jar.fullpath" value="${localJars.path}/${j2ee.jar}"/>
+		<property name="sharc.properties.xml" value="${resources.dir}/sharc.properties.xml"/>
+		<property name="log4j.properties" value="${resources.dir}/log4j.properties"/>
+
+	<path id="compile.classpath">
+		<fileset file="${repository.dir}/log4j/log4j/1.2.8/log4j-1.2.8.jar"/>
+		<fileset file="${repository.dir}/javax/servlet/servlet-api/2.4/servlet-api-2.4.jar"/>
+		<fileset file="${repository.dir}/javax/servlet/jstl/1.1.2/jstl-1.1.2.jar"/>
+		<fileset file="${repository.dir}/javax/servlet/jsp-api/2.0/jsp-api-2.0.jar"/>
+		<fileset file="${repository.dir}/commons-lang/commons-lang/2.3/commons-lang-2.3.jar"/>
+		<fileset file="${repository.dir}/commons-configuration/commons-configuration/1.4/commons-configuration-1.4.jar"/>
+		<fileset file="${repository.dir}/commons-collections/commons-collections/3.2/commons-collections-3.2.jar"/>
+		<fileset file="${repository.dir}/net/18thstreet/18thStreetLib/1.0/18thStreetLib-1.0.jar"/>
+		<fileset file="${repository.dir}/jfree/jcommon/1.0.5/jcommon-1.0.5.jar"/>
+		<fileset file="${repository.dir}/jfree/jfreechart/1.0.6/jfreechart-1.0.6.jar"/>
+		<fileset file="${repository.dir}/jdom/jdom/b9/jdom-b9.jar"/>
+	</path>	
+  <target name="/* CLEANUP */"/>
+  <target name="cleanBuild">
+			<delete dir="${build.dir}"/>
+	</target>
+  <target name="clean" depends="cleanBuild, cleanWar">
+	<delete file="${local.war.dir}/${war.name}"/>
+  </target>
+
+  <target name="cleanLocalClasses">
+	<delete dir="${local.classes.dir}/org"/>
+  </target>
+  <target name="cleanTomcatClasses">
+	  <delete dir="${tomcat.classes.dir}/org"/>
+  </target>
+  <target	name="cleanCompiledJsps">
+		<!-- <delete dir="${compiled.jsps.dir}"/> -->
+  </target>
+  <target name="tomcatSoftClean" depends="distWarClean">
+	<delete file="${tomcat.bin.dir}/debug.log"/>
+  </target>
+  <target name="tomcatWebappClean" depends="">
+	  <delete dir="${tomcat.app.dir}"/>
+  </target>
+
+  <target name="tomcatHardClean" depends="tomcatSoftClean, tomcatWebappClean, cleanCompiledJsps">
+  </target>
+
+   <target name="/* WARFILES */ "/>
+	<target name="cleanWar">
+	  <delete file="${local.war.dir}/${war.name}"/>
+	</target>
+  <target name="distWarClean"> 
+	  <delete file="${dist.war.file}"/>
+	</target>
+  <target name="build" depends="clean, buildFiles, compileJava">
+		<war warfile="${local.war.file}"
+			basedir="${build.dir}"
+			webxml="${local.WEB-INF.dir}/web.xml"
+			compress="false">
+			<exclude name="*.war"/>
+		</war>
+	</target>
+	<target name="distWar" depends="distWarClean, tomcatWebappClean, build">
+		<copy todir="${dist.webapps.dir}" file="${war.name}"/>
+	</target>
+
+  <target name="cleanDist" depends="clean, tomcatHardClean,distWar"/>
+	<target name="prepareBuild">
+	  <mkdir dir="${build.dir}"/>
+	  <mkdir dir="${build.WEB-INF.dir}"/>
+	  <mkdir dir="${build.classes.dir}"/>
+	  <mkdir dir="${build.lib.dir}"/>
+	</target>
+  <target name="/* BUILD */"/>
+	<target name="buildFiles" depends="prepareBuild">
+		<copy todir="${build.dir}">
+			<fileset dir="${basedir}">
+				<patternset>
+					<include name="**/*.jsp"/>
+					<include name="**/*.dtd"/>
+					<include name="**/*.xml"/>
+					<include name="**/*.xsl"/>
+					<include name="**/*.xsd"/>
+					<include name="**/*.txt"/>
+					<include name="**/*.js"/>
+					<!--
+					<include name="preloadJSPs.sh"/>
+					<include name="preloadJSPsLocal.sh"/>
+					-->
+					<!--  The <war> task complains if web.xml is included -->
+					<exclude name="WEB-INF/web.xml"/>
+					<exclude name="**/.svn"/>
+					<exclude name="**/*.sql"/>
+					<exclude name="**/CVS"/>
+				   <exclude name="build/**/*"/>
+					<exclude name="*build.xml"/>
+					<exclude name="doc/**/*"/>
+					<exclude name="RECYCLER/**/*"/>
+				</patternset>
+			</fileset>
+		</copy>
+		<copy todir="${build.classes.dir}" includeEmptyDirs="no">
+			<fileset dir="${resources.dir}">
+				<patternset>
+					<include name="**/*.*"/>
+				</patternset>
+			</fileset>
+		</copy>
+		<copy todir="${build.WEB-INF.dir}" includeEmptyDirs="no">
+			<fileset dir="${local.WEB-INF.dir}">
+				<patternset>
+					<include name="**/*.tld"/>
+				</patternset>
+			</fileset>
+		</copy>
+		<copy todir="${build.lib.dir}" includeEmptyDirs="no">
+			<fileset file="${repository.dir}/log4j/log4j/1.2.8/log4j-1.2.8.jar"/>
+			<fileset file="${repository.dir}/javax/servlet/servlet-api/2.4/servlet-api-2.4.jar"/>
+			<fileset file="${repository.dir}/javax/servlet/jstl/1.1.2/jstl-1.1.2.jar"/>
+			<fileset file="${repository.dir}/javax/servlet/jsp-api/2.0/jsp-api-2.0.jar"/>
+			<fileset file="${repository.dir}/commons-lang/commons-lang/2.3/commons-lang-2.3.jar"/>
+			<fileset file="${repository.dir}/commons-configuration/commons-configuration/1.4/commons-configuration-1.4.jar"/>
+			<fileset file="${repository.dir}/commons-collections/commons-collections/3.2/commons-collections-3.2.jar"/>
+			<fileset file="${repository.dir}/net/18thstreet/18thStreetLib/1.0/18thStreetLib-1.0.jar"/>
+			<fileset file="${repository.dir}/jfree/jcommon/1.0.5/jcommon-1.0.5.jar"/>
+			<fileset file="${repository.dir}/jfree/jfreechart/1.0.6/jfreechart-1.0.6.jar"/>
+			<fileset file="${repository.dir}/jdom/jdom/b9/jdom-b9.jar"/>
+		</copy>
+	</target>
+
+
+
+	<target name="compileJava" >
+		<javac srcdir="${local.src.dir}" destdir="${build.classes.dir}"
+			debug="on" optimize="off" deprecation="off">
+			<classpath refid="compile.classpath"/>
+		</javac>
+				<!-- this should be unneccesary 
+		<copy todir="${build.classes.dir}">
+			<fileset dir="src" includes="**/*.properties"/>
+		</copy>  -->
+	</target>
+  <target name="buildSharcXml">
+	<echo file="${sharc.properties.xml}" append="false">&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;
+&lt;configuration&gt;
+&lt;properties fileName="sharc.${whichServer}.properties"/&gt;
+&lt;properties fileName="sharc.global.properties"/&gt;
+&lt;/configuration&gt;
+	</echo>
+  </target>
+  <target name="buildLog4j">
+		<echo file="${log4j.properties}" append="false">log4j.rootLogger=${loggingLevel}, stdout
+log4j.appender.stdout.layout.ConversionPattern=%r %5p %c (line %L) - %m%n
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+		</echo>
+  </target>
+  <target name="production">
+		<antcall target="buildSharcXml">
+		  <param name="whichServer" value="production"/>
+		</antcall>
+		<antcall target="buildLog4j">
+		  <param name="loggingLevel" value="WARN"/>
+		</antcall>
+  </target>
+  <target name="preview">
+		<antcall target="buildSharcXml">
+		  <param name="whichServer" value="preview"/>
+		</antcall>
+		<antcall target="buildLog4j">
+		  <param name="loggingLevel" value="WARN"/>
+		</antcall>
+  </target>
+  <target name="development">
+		<antcall target="buildSharcXml">
+		  <param name="whichServer" value="development"/>
+		</antcall>
+		<antcall target="buildLog4j">
+		  <param name="loggingLevel" value="INFO"/>
+		</antcall>
+  </target>
+
+
+  <target name="/* BOUNCE */"/>
+	<target name="bounceJsp" depends="cleanCompiledJsps">
+		<copy todir="${tomcat.app.dir}">
+			<fileset dir="${basedir}">
+				<patternset>
+					<include name="**/*.jsp"/>
+					<include name="**/*.html"/>
+					<include name="**/*.htm"/>
+					<include name="**/*.css"/>
+					<include name="**/*.js"/>
+					<exclude name="doc/**/*"/>
+				</patternset>
+			</fileset>
+		</copy>
+	</target>
+	<target name="bounceImages">
+						<copy todir="${apache.dir}">
+			<fileset dir="${kestral.dir}">
+				<patternset>
+					<include name="**/*.jpg"/>
+					<include name="**/*.JPG"/>
+					<include name="**/*.jpeg"/>
+					<include name="**/*.JPEG"/>
+					<include name="**/*.gif"/>
+					<include name="**/*.GIF"/>
+										<include name="**/*.png"/>
+					<include name="**/*.PNG"/>
+										<include name="**/*.ico"/>
+				</patternset>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="bounceXml">
+		<copy todir="${tomcat.app.dir}">
+			<fileset dir="${basedir}">
+				<patternset>
+					<include name="**/*.xml"/>
+					<include name="**/*.xsl"/>
+					<include name="**/*.txt"/>
+					<include name="**/*.dtd"/>
+					<include name="**/*.xsd"/>
+					<exclude name="WEB-INF/web.xml"/>
+					<exclude name="build.xml"/>
+					<exclude name="*build.xml"/>
+				</patternset>
+			</fileset>
+		</copy>
+	</target>
+	<target name="bounceJava" depends="cleanTomcatClasses, distWarClean, cleanBuild, prepareBuild, compileJava">
+	  <copy todir="${tomcat.app.dir}/WEB-INF">
+		 		<fileset dir="${basedir}/WEB-INF">
+		   <patternset>
+			  <include name="**/*.jar"/>
+			  <include name="**/*.xml"/>
+	   		  <include name="**/*.dtd"/>
+			  <include name="**/*.tld"/>
+			  <include name="**/*.properties"/>
+			</patternset>
+
+		 </fileset>
+		 		<fileset dir="${build.dir}/WEB-INF">
+		   <patternset>
+			  <include name="**/*.class"/>
+			</patternset>
+		 </fileset>
+	  </copy>
+	</target>
+  <target name="bounceLib" depends="">
+	<copy todir="${tomcat.app.dir}/WEB-INF/lib">
+	   <fileset dir="${basedir}/WEB-INF/lib">
+		 <patternset>
+			<include name="**/*.jar"/>
+		  </patternset>
+	   </fileset>
+	</copy>
+  </target>
+	<target name="bounceJspJava" depends="bounceJsp, bounceJava">
+	</target>
+	<target name="bounceJspXml" depends="bounceJsp, bounceXml">
+	</target>
+	 <target name="bounceJavaXml" depends="bounceJava, bounceXml">
+	 </target>
+	<target name="/* OTHER */"/>
+	<target name="javadoc"
+		description="Generate JavaDoc API docs">
+		<delete dir="./doc/api"/>
+		<mkdir dir="./doc/api"/>
+		<javadoc sourcepath="src"
+			destdir="./doc/api"
+			classpath="${servlet.jar}:${jdbc20ext.jar}"
+			packagenames="*"
+			author="true"
+			private="false"
+			version="true"
+			windowtitle="${project.title} API Documentation"
+			doctitle="&lt;h1&gt;${project.title} Documentation (Version ${project.version})&lt;/h1&gt;"
+			bottom="Copyright &#169; 2002">
+			<classpath refid="compile.classpath"/>
+		</javadoc>
+	</target>
+  <target name="foo">
+		  <echo message="[${build.dir}]"/>
+  </target>
+	
+	<target name="mySqlDump">
+		<delete file="${basedir}/res/sql/whydah.sql"/>
+		<exec executable="mysqldump" os="Windows XP" output="${basedir}/res/sql/whydah.sql">
+			<arg line=" -Q -h ${mysql.host} -c --add-drop-table -u ${mysql.username} --password=${mysql.password} whydah "/>
+		</exec>
+	</target>
+  <target name="showVar">
+		<echo>${catalina.home}</echo>
+	  </target>
+
+	<target name="mySqlImport">
+		<sql autocommit="true"
+			driver="com.mysql.jdbc.Driver"
+			onerror="continue"
+			password="${mysql.password}"
+			src="res/sql/whydah.sql"
+			url="jdbc:mysql://${mysql.host}:3306/whydah"
+			userid="${mysql.username}">
+			<classpath refid="compile.classpath"/>
+		</sql>
+	</target>
+</project>

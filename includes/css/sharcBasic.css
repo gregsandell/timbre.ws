@@ -1,0 +1,9 @@
+body, h1, h2, h3, td	{
+	font-family:  Verdana, Arial, Helvetica, sans-serif;
+}
+p, td, li, dd, dt, i {
+	font-size: 12px;
+}
+.smallFontComment {
+	font-size: 11px;
+}
